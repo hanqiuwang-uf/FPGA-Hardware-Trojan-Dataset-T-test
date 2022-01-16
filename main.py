@@ -45,6 +45,68 @@ def Ttest250(inputfile, outputfile="Ttest250.trcs"):
     wf.close()
 
 
+def Ttest259(inputfile, outputfile="Ttest259.trcs"):
+    '''
+    :param inputfile: Input dataset filename
+    :param outputfile: Output dataset filename you want
+    The original version of the t-test, which calculates
+    the maximum value of the 10*10 sets of 250 data
+    '''
+    hf = h5py.File(inputfile, 'r')
+    xlab = list(hf.keys())
+    ylab = list(hf[xlab[0]].keys())
+
+    l = []
+    m = []
+    f = [[] for x in range(10)]
+    for i in xlab:
+        for j in ylab:
+            random_temp = np.zeros((2000,250))
+            semifixed_temp = np.zeros((2000,250))
+            random_temp[:,0:34] = np.transpose(hf[i][j]['TVLA']['random'][0:34])
+            semifixed_temp[:,0:18] = np.transpose(hf[i][j]['TVLA']['random'][35:53])
+            random_temp[:,34:58] = np.transpose(hf[i][j]['TVLA']['random'][54:78])
+            semifixed_temp[:,18:46] = np.transpose(hf[i][j]['TVLA']['random'][79:107])
+            random_temp[:,58:76] = np.transpose(hf[i][j]['TVLA']['random'][108:126])
+            semifixed_temp[:,46:68] = np.transpose(hf[i][j]['TVLA']['random'][127:149])
+            random_temp[:,76:105] = np.transpose(hf[i][j]['TVLA']['random'][150:179])
+            semifixed_temp[:,68:87] = np.transpose(hf[i][j]['TVLA']['random'][180:199])
+            random_temp[:,105:150] = np.transpose(hf[i][j]['TVLA']['random'][200:245])
+            semifixed_temp[:,87:90] = np.transpose(hf[i][j]['TVLA']['random'][246:249])
+            random_temp[:,150:159] = np.transpose(hf[i][j]['TVLA']['random'][250:259])
+            random_temp[:,159:180] = np.transpose(hf[i][j]['TVLA']['semifixed'][0:21])
+            semifixed_temp[:,90:143] = np.transpose(hf[i][j]['TVLA']['semifixed'][22:75])
+            random_temp[:,180:199] = np.transpose(hf[i][j]['TVLA']['semifixed'][76:95])
+            semifixed_temp[:,143:180] = np.transpose(hf[i][j]['TVLA']['semifixed'][96:133])
+            random_temp[:,199:228] = np.transpose(hf[i][j]['TVLA']['semifixed'][134:163])
+            semifixed_temp[:,180:229] = np.transpose(hf[i][j]['TVLA']['semifixed'][164:213])
+            random_temp[:,228:250] = np.transpose(hf[i][j]['TVLA']['semifixed'][214:236])
+            semifixed_temp[:,229:250] = np.transpose(hf[i][j]['TVLA']['semifixed'][237:258])
+            random = random_temp
+            semifixed = semifixed_temp
+            for k in range(len(random)):
+                l.append(scipy.stats.ttest_ind(random[k], semifixed[k], equal_var=False)[0])
+            m.append(round(max(l), 4))
+            l = []
+    for i in range(10):
+        f[i] = m[10 * i:10 * i + 9]
+
+    n = np.array(f)
+    plt.imshow(n, cmap="YlGnBu", interpolation='nearest')
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.colorbar()
+    plt.show()
+    wf = h5py.File(outputfile, 'w')
+    for i in range(10):
+        tg1 = wf.create_group(xlab[i])
+        for j in range(10):
+            tg2 = tg1.create_group(ylab[j])
+            tg2.create_dataset("t", data=m[i * 10 + j])
+
+    wf.close()
+
+
 def Ttest249(inputfile, outputfile="Ttest249.trcs"):
     '''
     :param inputfile: Input dataset filename
