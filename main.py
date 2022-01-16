@@ -181,9 +181,32 @@ def TtestMultiFile(inputfile1, inputfile2, flag='R_R'):
     plt.colorbar()
     plt.show()
 
+def find_loc(inputfile):
+    hf1 = h5py.File(inputfile, 'r')
+    xlab1 = list(hf1.keys())
+    ylab1 = list(hf1[xlab1[0]].keys())
+    
+    em_max = np.zeros((10,10))
+    for i in range(len(xlab1)):
+        for j in range(len(ylab1)):
+            random1 = np.array(hf1[xlab1[i]][ylab1[j]]['TVLA']['random'][150])
+            em_max[i,j] = max(random1) - min(random1)
+            if em_max[i,j] < 4000:
+                em_max[i,j] = 0
+            #plt.scatter(range(2000),random1)
+            #plt.plot(range(2000),random1)
+            #plt.show()
+            
+    print(em_max)
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
 if __name__ == '__main__':
     print("test")
+    find_loc('notrojan_differentsemi_notrigger_manualshuffle_xinpian_sga_250_new2.trcs')
+    find_loc('notrojan_samesemi_manualshuffle_xinpian_sga_250_new2.trcs')
+    find_loc('notrojan_samesemi_notrigger_manualshuffle_xinpian_sga_250_new2.trcs')
+    find_loc('notrojan_xinpian_sga_250_new1_fixed.trcs')
+    find_loc('notrojan_xinpian_sga_250_new1.trcs')
     # Ttest250('xxx.trcs', 'Ttest250.trcs')
     # Ttest249('xxx.trcs', 'Ttest249.trcs')
     # ED(inputfile='xxx.trcs')
